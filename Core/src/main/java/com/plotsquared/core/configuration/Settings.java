@@ -171,6 +171,7 @@ public class Settings extends Config {
 
         // Plot limits
         Claim.MAX_AUTO_AREA = config.getInt("claim.max-auto-area", Claim.MAX_AUTO_AREA);
+        Claim.FORCE_AUTO_WORLD = config.getString("claim.force-auto-world", Claim.FORCE_AUTO_WORLD);
         Limit.MAX_PLOTS = config.getInt("max_plots", Limit.MAX_PLOTS);
         Limit.GLOBAL = config.getBoolean("global_limit", Limit.GLOBAL);
 
@@ -614,6 +615,10 @@ public class Settings extends Config {
         @Comment("The max plots claimed in a single `/plot auto <size>` command")
         public static int
                 MAX_AUTO_AREA = 4;
+
+        @Comment({"The world to always use for `/plot auto`, regardless of where the player is",
+                "Leave empty to use the default behavior (player's current world)"})
+        public static String FORCE_AUTO_WORLD = "";
 
     }
 

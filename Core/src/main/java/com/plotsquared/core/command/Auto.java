@@ -182,27 +182,45 @@ public class Auto extends SubCommand {
 
     @Override
     public boolean onCommand(final PlotPlayer<?> player, String[] args) {
-        PlotArea plotarea = player.getApplicablePlotArea();
-        if (plotarea == null) {
-            final PermissionHandler permissionHandler = PlotSquared.platform().permissionHandler();
-            if (permissionHandler.hasCapability(
-                    PermissionHandler.PermissionHandlerCapability.PER_WORLD_PERMISSIONS)) {
-                for (final PlotArea area : this.plotAreaManager.getAllPlotAreas()) {
-                    if (player.hasPermission(area.getWorldName(), "plots.auto")) {
-                        if (plotarea != null) {
-                            plotarea = null;
-                            break;
-                        }
-                        plotarea = area;
-                    }
+        PlotArea plotarea;
+        // Check if a default world is configured - if so, always use it
+        final String defaultWorld = Settings.Claim.FORCE_AUTO_WORLD;
+        if (!defaultWorld.isEmpty()) {
+            plotarea = null;
+            for (final PlotArea area : this.plotAreaManager.getAllPlotAreas()) {
+                if (area.getWorldName().equalsIgnoreCase(defaultWorld)) {
+                    plotarea = area;
+                    break;
                 }
-            }
-            if (this.plotAreaManager.getAllPlotAreas().length == 1) {
-                plotarea = this.plotAreaManager.getAllPlotAreas()[0];
             }
             if (plotarea == null) {
                 player.sendMessage(TranslatableCaption.of("errors.not_in_plot_world"));
                 return false;
+            }
+        } else {
+            // Default behavior: use player's current plot area
+            plotarea = player.getApplicablePlotArea();
+            if (plotarea == null) {
+                final PermissionHandler permissionHandler = PlotSquared.platform().permissionHandler();
+                if (permissionHandler.hasCapability(
+                        PermissionHandler.PermissionHandlerCapability.PER_WORLD_PERMISSIONS)) {
+                    for (final PlotArea area : this.plotAreaManager.getAllPlotAreas()) {
+                        if (player.hasPermission(area.getWorldName(), "plots.auto")) {
+                            if (plotarea != null) {
+                                plotarea = null;
+                                break;
+                            }
+                            plotarea = area;
+                        }
+                    }
+                }
+                if (this.plotAreaManager.getAllPlotAreas().length == 1) {
+                    plotarea = this.plotAreaManager.getAllPlotAreas()[0];
+                }
+                if (plotarea == null) {
+                    player.sendMessage(TranslatableCaption.of("errors.not_in_plot_world"));
+                    return false;
+                }
             }
         }
         int sizeX = 1;
